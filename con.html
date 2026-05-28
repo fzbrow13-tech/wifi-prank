@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>⚠️ SYSTEM ERROR</title>
+    <style>
+        * { 
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            height: -webkit-fill-available;
+            overflow: hidden !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            overscroll-behavior: none !important;
+            -webkit-overflow-scrolling: none !important;
+            touch-action: none !important;
+            pointer-events: auto !important;
+        }
+        
+        body {
+            background: #000;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            color: #ff0000;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        /* ========== WIFI PANEL ========== */
+        .wifi-panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px 25px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .wifi-panel.hidden { display: none !important; }
+        
+        .wifi-icon { font-size: 60px; margin-bottom: 10px; }
+        .wifi-title { font-size: 24px; font-weight: bold; color: #1a1a2e; margin-bottom: 5px; }
+        .wifi-subtitle { font-size: 12px; color: #666; letter-spacing: 1px; margin-bottom: 20px; }
+        
+        .wifi-list { text-align: left; margin-bottom: 15px; }
+        
+        .wifi-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 15px; border: 1px solid #e0e0e0;
+            border-radius: 10px; margin-bottom: 8px;
+            cursor: pointer; transition: 0.3s;
+        }
+        
+        .wifi-item:active { background: #e6f0ff; border-color: #0066FF; }
+        .wifi-item.open { border-color: #00cc66; background: #f0fff4; }
+        
+        .wifi-name { font-weight: bold; color: #333; font-size: 14px; }
+        .wifi-signal { color: #0066FF; font-size: 16px; }
+        .wifi-status { font-size: 11px; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
+        .status-open { background: #00cc66; color: #fff; }
+        
+        .btn-connect {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, #0066FF, #00cc66);
+            color: #fff; border: none; border-radius: 12px;
+            font-size: 18px; font-weight: bold; cursor: pointer;
+            letter-spacing: 2px; transition: 0.3s; text-transform: uppercase;
+        }
+        
+        .btn-connect:active { transform: scale(0.95); }
+        
+        .footer-text { font-size: 10px; color: #999; margin-top: 15px; letter-spacing: 1px; }
+        
+        /* ========== PANIC OVERLAY - FULL SCREEN LOCK ========== */
+        .panic-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            background: #0a0000 !important;
+            z-index: 99999 !important;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            touch-action: none !important;
+            pointer-events: auto !important;
+        }
+        
+        .panic-overlay.active {
+            display: flex !important;
+        }
+        
+        .panic-bg-anim {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(45deg, #8B0000, #ff0000, #B22222, #DC143C, #8B0000);
+            background-size: 400% 400%;
+            animation: panicPulse 0.5s infinite;
+            z-index: 0;
+        }
+        
+        @keyframes panicPulse {
+            0%,100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .panic-box {
+            position: relative;
+            z-index: 2;
+            background: rgba(0,0,0,0.9);
+            border: 3px solid #ff0000;
+            border-radius: 20px;
+            padding: 25px 20px;
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+            box-shadow: 0 0 60px rgba(255,0,0,0.9), 0 0 120px rgba(255,0,0,0.5);
+            animation: shakeBox 0.2s infinite;
+        }
+        
+        @keyframes shakeBox {
+            0%,100% { transform: translate(0); }
+            25% { transform: translate(-3px, 3px); }
+            50% { transform: translate(3px, -3px); }
+            75% { transform: translate(-3px, -3px); }
+        }
+        
+        .panic-icon { font-size: 70px; animation: bounceIcon 0.4s infinite; }
+        
+        @keyframes bounceIcon {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .panic-title { 
+            color: #ff0000; font-size: 24px; font-weight: bold; 
+            margin: 10px 0; text-shadow: 0 0 20px #ff0000; 
+            animation: glitchText 0.3s infinite;
+        }
+        
+        @keyframes glitchText {
+            0%,100% { text-shadow: 2px 2px #ff0000; }
+            25% { text-shadow: -2px 2px #ff0000; }
+            50% { text-shadow: 2px -2px #ff0000; }
+            75% { text-shadow: -2px -2px #ff0000; }
+        }
+        
+        .panic-text { 
+            color: #ff6666; font-size: 12px; margin-bottom: 15px; 
+            animation: blinkText 0.8s infinite;
+        }
+        
+        @keyframes blinkText {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        
+        .panic-input {
+            width: 100%; padding: 14px;
+            background: #000; border: 2px solid #ff0000;
+            color: #ff0000; text-align: center; font-size: 22px;
+            letter-spacing: 12px; border-radius: 10px; outline: none;
+            font-family: 'Courier New', monospace; margin-bottom: 12px;
+            caret-color: #ff0000;
+            -webkit-text-security: disc;
+            touch-action: auto !important;
+            pointer-events: auto !important;
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+        
+        .panic-input:focus { 
+            box-shadow: 0 0 30px rgba(255,0,0,0.8); 
+            border-color: #ff4444;
+        }
+        
+        .panic-input::placeholder { 
+            color: #440000; letter-spacing: 3px; font-size: 12px; 
+        }
+        
+        .panic-btn {
+            padding: 14px 30px; background: #ff0000; color: #fff;
+            border: none; border-radius: 10px; font-weight: bold;
+            cursor: pointer; letter-spacing: 2px; text-transform: uppercase;
+            animation: pulseBtn 0.8s infinite;
+            touch-action: auto !important;
+            pointer-events: auto !important;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        @keyframes pulseBtn {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.08); background: #cc0000; }
+        }
+        
+        .panic-btn:active { transform: scale(0.9); background: #990000; }
+        
+        .panic-msg { 
+            color: #ffff00; font-size: 11px; margin-top: 10px; min-height: 16px; 
+            animation: blinkText 0.5s infinite;
+        }
+        
+        .prank-reveal {
+            display: none; text-align: center; color: #fff;
+            position: relative; z-index: 2;
+        }
+        
+        .prank-reveal.active { display: block; }
+        .prank-reveal h1 { font-size: 36px; color: #00ff00; }
+        .prank-reveal .emoji { font-size: 80px; }
+        
+        .warning-strip {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            background: #ff0000;
+            color: #000;
+            text-align: center;
+            padding: 8px;
+            font-weight: bold;
+            font-size: 11px;
+            letter-spacing: 3px;
+            z-index: 3;
+            animation: blinkBg 0.5s infinite;
+        }
+        
+        @keyframes blinkBg {
+            0%,100% { background: #ff0000; color: #000; }
+            50% { background: #000; color: #ff0000; }
+        }
+        
+        .warning-strip-bottom {
+            position: fixed;
+            bottom: 0; left: 0;
+            width: 100%;
+            background: #ff0000;
+            color: #000;
+            text-align: center;
+            padding: 8px;
+            font-weight: bold;
+            font-size: 11px;
+            letter-spacing: 3px;
+            z-index: 3;
+            animation: blinkBg 0.5s infinite;
+            animation-delay: 0.25s;
+        }
+        
+        @media (max-width: 480px) {
+            .wifi-panel { padding: 20px 15px; }
+            .wifi-title { font-size: 20px; }
+            .panic-title { font-size: 20px; }
+            .panic-box { padding: 20px 15px; }
+            .panic-input { font-size: 18px; letter-spacing: 10px; padding: 12px; }
+            .panic-btn { padding: 12px 25px; font-size: 14px; }
+        }
+        
+        @media (min-width: 768px) {
+            .panic-box { max-width: 450px; }
+            .panic-title { font-size: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== WIFI PANEL ========== -->
+    <div class="wifi-panel" id="wifiPanel">
+        <div class="wifi-icon">📶</div>
+        <div class="wifi-title">Free WiFi Connector</div>
+        <div class="wifi-subtitle">Tersedia 3 jaringan WiFi gratis di sekitar Anda</div>
+        
+        <div class="wifi-list">
+            <div class="wifi-item open">
+                <span class="wifi-signal">📶📶📶</span>
+                <span class="wifi-name">WiFi Gratis Hotel</span>
+                <span class="wifi-status status-open">OPEN</span>
+            </div>
+            <div class="wifi-item open">
+                <span class="wifi-signal">📶📶</span>
+                <span class="wifi-name">Free Public WiFi</span>
+                <span class="wifi-status status-open">OPEN</span>
+            </div>
+            <div class="wifi-item open">
+                <span class="wifi-signal">📶📶📶📶</span>
+                <span class="wifi-name">Starbucks WiFi</span>
+                <span class="wifi-status status-open">OPEN</span>
+            </div>
+        </div>
+        
+        <button class="btn-connect" onclick="triggerPanic()">🔗 CONNECT SEKARANG</button>
+        <div class="footer-text">Free WiFi Connector • By Fanzz</div>
+    </div>
+
+    <!-- ========== PANIC OVERLAY ========== -->
+    <div class="panic-overlay" id="panicOverlay">
+        <div class="panic-bg-anim"></div>
+        <div class="warning-strip">⚠️ SYSTEM COMPROMISED ⚠️</div>
+        <div class="warning-strip-bottom">⚠️ DO NOT TURN OFF ⚠️</div>
+        
+        <div class="panic-box" id="panicBox">
+            <div class="panic-icon">💀</div>
+            <div class="panic-title">DEVICE TERKUNCI!</div>
+            <div class="panic-text">WiFi mengandung MALWARE!<br>Masukkan password untuk membuka!</div>
+            <input type="password" id="panicPassword" class="panic-input" placeholder="••••" maxlength="10" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done">
+            <button class="panic-btn" onclick="unlockDevice()">🔓 BUKA KUNCI</button>
+            <div class="panic-msg" id="panicMsg">🚨 MASUKKAN PASSWORD! 🚨</div>
+        </div>
+        
+        <div class="prank-reveal" id="prankReveal">
+            <div class="emoji">😂</div>
+            <h1>KENA PRANK!</h1>
+            <p style="font-size:18px;color:#00ff00;margin-top:10px;">Lo kira WiFi beneran? 🤣</p>
+            <p style="color:#ccc;margin-top:10px;">Password: 2012</p>
+            <p style="color:#888;margin-top:25px;font-size:12px;">By Fanzz • WiFi Prank 2026</p>
+        </div>
+    </div>
+
+    <script>
+        // ==================== VARIABEL ====================
+        const wifiPanel = document.getElementById('wifiPanel');
+        const panicOverlay = document.getElementById('panicOverlay');
+        const panicBox = document.getElementById('panicBox');
+        const panicPassword = document.getElementById('panicPassword');
+        const panicMsg = document.getElementById('panicMsg');
+        const prankReveal = document.getElementById('prankReveal');
+        
+        let isPanicActive = false;
+        let isUnlocked = false;
+        const UNLOCK_PASSWORD = '2012';
+        let wrongAttempts = 0;
+        
+        // ==================== ALARM SUPER KERAS ====================
+        let alarmContext = null;
+        let alarmInterval = null;
+        
+        function startAlarm() {
+            if (alarmContext) return;
+            try {
+                alarmContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                function createTone(freq, duration, startTime) {
+                    if (!alarmContext) return;
+                    const osc = alarmContext.createOscillator();
+                    const gain = alarmContext.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, startTime);
+                    gain.gain.setValueAtTime(0.5, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                    osc.connect(gain);
+                    gain.connect(alarmContext.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                }
+                
+                function playSiren() {
+                    if (!alarmContext) return;
+                    const now = alarmContext.currentTime;
+                    for (let i = 0; i < 8; i++) {
+                        createTone(880, 0.1, now + i * 0.2);
+                        createTone(1320, 0.1, now + i * 0.2 + 0.1);
+                    }
+                    for (let i = 0; i < 8; i++) {
+                        createTone(1100, 0.08, now + 1.6 + i * 0.16);
+                        createTone(660, 0.08, now + 1.6 + i * 0.16 + 0.08);
+                    }
+                }
+                
+                playSiren();
+                alarmInterval = setInterval(playSiren, 2800);
+            } catch(e) {
+                console.log('Alarm init error:', e);
+            }
+        }
+        
+        function stopAlarm() {
+            if (alarmInterval) clearInterval(alarmInterval);
+            if (alarmContext) {
+                try { alarmContext.close(); } catch(e) {}
+            }
+            alarmContext = null;
+            alarmInterval = null;
+        }
+        
+        // ==================== VIBRATE CONTINUOUS ====================
+        let vibrateInterval = null;
+        
+        function startVibrate() {
+            if (navigator.vibrate) {
+                vibrateInterval = setInterval(() => {
+                    navigator.vibrate([200, 100, 200, 100, 400]);
+                }, 1500);
+            }
+        }
+        
+        function stopVibrate() {
+            if (vibrateInterval) clearInterval(vibrateInterval);
+            if (navigator.vibrate) navigator.vibrate(0);
+        }
+        
+        function vibrateBurst() {
+            if (navigator.vibrate) {
+                navigator.vibrate([300, 150, 300, 150, 600]);
+            }
+        }
+        
+        // ==================== FULLSCREEN FORCE ====================
+        function requestFullscreen() {
+            const el = document.documentElement;
+            try {
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(() => {});
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                } else if (el.msRequestFullscreen) {
+                    el.msRequestFullscreen();
+                }
+            } catch(e) {}
+        }
+        
+        function lockOrientation() {
+            try {
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('portrait').catch(() => {});
+                }
+            } catch(e) {}
+        }
+        
+        // ==================== TRIGGER PANIC ====================
+        function triggerPanic() {
+            if (isPanicActive) return;
+            
+            isPanicActive = true;
+            wrongAttempts = 0;
+            
+            // Sembunyiin panel WiFi
+            wifiPanel.classList.add('hidden');
+            
+            // Tampilin panic overlay
+            panicOverlay.classList.add('active');
+            panicBox.style.display = 'block';
+            prankReveal.classList.remove('active');
+            prankReveal.style.display = 'none';
+            
+            // Fullscreen + lock orientation
+            requestFullscreen();
+            lockOrientation();
+            
+            // Alarm + Vibrate
+            startAlarm();
+            startVibrate();
+            vibrateBurst();
+            
+            // Fokus input
+            setTimeout(() => {
+                panicPassword.focus();
+            }, 300);
+            
+            panicMsg.textContent = '🚨 MASUKKAN PASSWORD! 🚨';
+            
+            // Push history states
+            for (let i = 0; i < 20; i++) {
+                history.pushState(null, '', location.href);
+            }
+        }
+        
+        // ==================== UNLOCK DEVICE ====================
+        function unlockDevice() {
+            if (!isPanicActive) return;
+            
+            const password = panicPassword.value.trim();
+            
+            if (password === UNLOCK_PASSWORD) {
+                // UNLOCK!
+                isPanicActive = false;
+                isUnlocked = true;
+                wrongAttempts = 0;
+                
+                stopAlarm();
+                stopVibrate();
+                if (navigator.vibrate) navigator.vibrate(0);
+                
+                // Tampilin pesan prank
+                panicBox.style.display = 'none';
+                prankReveal.classList.add('active');
+                prankReveal.style.display = 'block';
+                
+                // Ubah background
+                document.querySelector('.panic-bg-anim').style.background = '#000';
+                document.querySelector('.panic-bg-anim').style.animation = 'none';
+                
+                // Sembunyiin warning strips
+                document.querySelector('.warning-strip').style.display = 'none';
+                document.querySelector('.warning-strip-bottom').style.display = 'none';
+                
+                // Getar sukses
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 200]);
+                }
+                
+                // Exit fullscreen after 2 seconds
+                setTimeout(() => {
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen().catch(() => {});
+                    }
+                }, 2000);
+                
+            } else {
+                // Password salah
+                wrongAttempts++;
+                panicMsg.textContent = '❌ SALAH! PERCOBAAN KE-' + wrongAttempts + ' ❌';
+                panicPassword.value = '';
+                panicPassword.focus();
+                
+                // Getar makin kenceng
+                const vibDuration = Math.min(wrongAttempts * 200, 1000);
+                if (navigator.vibrate) {
+                    navigator.vibrate([vibDuration, 100, vibDuration, 100, vibDuration]);
+                }
+            }
+        }
+        
+        // ==================== SUPER ANTI-ESCAPE ====================
+        
+        // Block popstate (back button)
+        window.addEventListener('popstate', function(e) {
+            if (isPanicActive) {
+                history.pushState(null, '', location.href);
+                history.pushState(null, '', location.href);
+                history.pushState(null, '', location.href);
+                requestFullscreen();
+            }
+        });
+        
+        // Block touchstart di tepi layar (swipe back)
+        document.addEventListener('touchstart', function(e) {
+            if (isPanicActive) {
+                if (e.touches.length === 1 && e.touches[0].clientX < 40) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    history.pushState(null, '', location.href);
+                }
+                // Block semua touch kecuali di input & button
+                const target = e.target;
+                if (target !== panicPassword && target !== document.querySelector('.panic-btn') && 
+                    !target.closest('.panic-btn')) {
+                    e.preventDefault();
+                    panicPassword.focus();
+                }
+            }
+        }, { passive: false, capture: true });
+        
+        // Block touchmove (scrolling & gesture)
+        document.addEventListener('touchmove', function(e) {
+            if (isPanicActive) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, { passive: false, capture: true });
+        
+        // Block touchend
+        document.addEventListener('touchend', function(e) {
+            if (isPanicActive) {
+                const target = e.target;
+                if (target !== panicPassword && target !== document.querySelector('.panic-btn') && 
+                    !target.closest('.panic-btn')) {
+                    e.preventDefault();
+                    panicPassword.focus();
+                }
+            }
+        }, { passive: false, capture: true });
+        
+        // Block gesture events
+        document.addEventListener('gesturestart', function(e) {
+            if (isPanicActive) e.preventDefault();
+        }, { capture: true });
+        
+        document.addEventListener('gesturechange', function(e) {
+            if (isPanicActive) e.preventDefault();
+        }, { capture: true });
+        
+        document.addEventListener('gestureend', function(e) {
+            if (isPanicActive) e.preventDefault();
+        }, { capture: true });
+        
+        // Block keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (isPanicActive) {
+                const blockedKeys = ['Escape', 'F5', 'F11', 'F12', 'BrowserHome', 'BrowserBack', 'BrowserForward', 'MediaPlayPause'];
+                if (blockedKeys.includes(e.key)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if (e.ctrlKey && ['r','w','t','n','h','j','d','p','s','u'].includes(e.key)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if (e.ctrlKey && e.shiftKey && ['t','n','i','delete'].includes(e.key)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if (e.altKey && (e.key === 'F4' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if (e.key === 'Backspace' && document.activeElement !== panicPassword) {
+                    e.preventDefault();
+                }
+            }
+            
+            // Filter input password - HANYA ANGKA
+            if (document.activeElement === panicPassword) {
+                if (!/[0-9]/.test(e.key) && 
+                    !['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Enter'].includes(e.key)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }
+        }, { capture: true, passive: false });
+        
+        // Block beforeunload
+        window.addEventListener('beforeunload', function(e) {
+            if (isPanicActive && !isUnlocked) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+        
+        // Block context menu
+        document.addEventListener('contextmenu', function(e) {
+            if (isPanicActive) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, { capture: true });
+        
+        // Block select
+        document.addEventListener('selectstart', function(e) {
+            if (isPanicActive && e.target !== panicPassword) {
+                e.preventDefault();
+            }
+        }, { capture: true });
+        
+        // Block drag
+        document.addEventListener('dragstart', function(e) {
+            if (isPanicActive) e.preventDefault();
+        }, { capture: true });
+        
+        // Block scroll
+        document.addEventListener('scroll', function(e) {
+            if (isPanicActive) {
+                window.scrollTo(0, 0);
+                e.preventDefault();
+            }
+        }, { passive: false, capture: true });
+        
+        // Block wheel
+        document.addEventListener('wheel', function(e) {
+            if (isPanicActive) e.preventDefault();
+        }, { passive: false, capture: true });
+        
+        // Keep fullscreen
+        document.addEventListener('fullscreenchange', function() {
+            if (isPanicActive && !document.fullscreenElement) {
+                requestFullscreen();
+            }
+        });
+        
+        document.addEventListener('webkitfullscreenchange', function() {
+            if (isPanicActive && !document.webkitFullscreenElement) {
+                requestFullscreen();
+            }
+        });
+        
+        // Detect visibility change
+        document.addEventListener('visibilitychange', function() {
+            if (isPanicActive && !isUnlocked) {
+                if (document.hidden) {
+                    document.title = '🚨 JANGAN TINGGALKAN!';
+                } else {
+                    document.title = '⚠️ DEVICE TERKUNCI!';
+                    requestFullscreen();
+                    panicPassword.focus();
+                    for (let i = 0; i < 10; i++) {
+                        history.pushState(null, '', location.href);
+                    }
+                }
+            }
+        });
+        
+        // Block window blur
+        window.addEventListener('blur', function() {
+            if (isPanicActive && !isUnlocked) {
+                setTimeout(function() {
+                    window.focus();
+                    requestFullscreen();
+                    panicPassword.focus();
+                    history.pushState(null, '', location.href);
+                }, 50);
+            }
+        });
+        
+        // Auto refocus on any click
+        document.addEventListener('click', function(e) {
+            if (isPanicActive && !isUnlocked) {
+                requestFullscreen();
+                if (e.target !== panicPassword && e.target !== document.querySelector('.panic-btn') && 
+                    !e.target.closest('.panic-btn')) {
+                    panicPassword.focus();
+                }
+            }
+        }, { capture: true });
+        
+        // ENTER key untuk submit
+        panicPassword.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                unlockDevice();
+            }
+        });
+        
+        // Input hanya angka
+        panicPassword.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        
+        // ==================== INIT ====================
+        function init() {
+            history.pushState(null, '', location.href);
+            history.pushState(null, '', location.href);
+            history.pushState(null, '', location.href);
+            
+            console.log('📶 WiFi Prank ULTIMATE ready!');
+            console.log('🔒 Full Screen Lock Active');
+            console.log('🔑 Unlock Password: ' + UNLOCK_PASSWORD);
+            console.log('⚠️ Target tidak bisa kabur kecuali masukkan password!');
+        }
+        
+        init();
+    </script>
+</body>
+</html>
